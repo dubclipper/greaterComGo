@@ -11,17 +11,16 @@ func main() {
 	increment := 0
 	gort := 100
 	wg.Add(gort)
-	var m sync.Mutex
+	var m sync.Mutex //mutual exclusion to keep many goroutines from accessing a variable at the same time
 
 	for i := 0; i < gort; i++ {
 		go func() {
-			m.Lock()
+			m.Lock() //locks it down so that only 1 goroutine can access 'increment'
 			v := increment
 			v++
 			increment = v
 			fmt.Println(increment)
-			m.Unlock()
-
+			m.Unlock() //makes 'increment' available again; unlocks for other goroutines
 			wg.Done()
 		}()
 	}
