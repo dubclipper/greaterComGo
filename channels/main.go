@@ -3,22 +3,40 @@ package main
 import "fmt"
 
 func main() {
+	evn := make(chan int)
+	odd := make(chan int)
+	qit := make(chan int)
 
-	c := make(chan int)
-	
 	//send
-	go func()  {
-		for i :=0; i < 100; i++{
-			c <- i
-		}
-		close(c)
-	}()
+	go send(evn, odd, qit)
 
 	//receive
-	for v := range c {
-		fmt.Println(v)
-	}
+	receive(evn, odd, qit)
 
-	fmt.Println("about to exit")
+	fmt.Println("time to exit!")
 }
 
+func receive(e, o, q <-chan int) {
+	for {
+		select {
+		case v := <-e:
+			fmt.Println("from the evn channel:", v)
+		case v := <-o:
+			fmt.Println("from the odd channel:", v)
+		case v := <-q:
+			fmt.Println("from the quit channel:", v)
+			return
+		}
+	}
+}
+
+func send(e, o, q chan<- int) {
+	for i := 0; i < 100; i++ {
+		if i%2 == 0 {
+			e <- i
+		} else {
+			o <- i
+		}
+	}
+	q <- 0
+}
